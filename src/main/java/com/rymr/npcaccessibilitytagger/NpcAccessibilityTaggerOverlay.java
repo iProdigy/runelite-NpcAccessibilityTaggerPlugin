@@ -56,7 +56,7 @@ public class NpcAccessibilityTaggerOverlay extends Overlay {
     @Override
     public Dimension render(Graphics2D graphics) {
         if (config.appendWordToNPC()) {
-            for (NPC npc : client.getCachedNPCs()) {
+            for (NPC npc : client.getTopLevelWorldView().npcs()) {
                 if (!shouldShow(npc)) {
                     continue;
                 }
