@@ -62,8 +62,8 @@ Create and login to a [osrs wiki](https://oldschool.runescape.wiki/) account. Go
 
 ## Author
 
-This plugin was created by R-Y-M-R.
+This plugin was originally created by R-Y-M-R.
 
 ## Support, Help, Bugs, Suggestions
 
-[Create a detailed issue on github](https://github.com/R-Y-M-R/NpcAccessibilityTaggerPlugin/issues/new/choose), or ask someone kindly in the [runelite discord](https://runelite.net/discord).
+[Create a detailed issue on github](https://github.com/iProdigy/runelite-NpcAccessibilityTaggerPlugin/issues/new), or ask someone kindly in the [runelite discord](https://runelite.net/discord).
