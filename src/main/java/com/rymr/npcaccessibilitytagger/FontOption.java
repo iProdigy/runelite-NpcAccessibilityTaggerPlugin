@@ -37,6 +37,7 @@ public enum FontOption {
     RUNESCAPE("Runescape", FontManager.getRunescapeFont()),
     RUNESCAPE_SMALL("Runescape Small", FontManager.getRunescapeSmallFont()),
     RUNESCAPE_BOLD("Runescape Bold", FontManager.getRunescapeBoldFont());
+
     @Getter
     private final String name;
     @Getter

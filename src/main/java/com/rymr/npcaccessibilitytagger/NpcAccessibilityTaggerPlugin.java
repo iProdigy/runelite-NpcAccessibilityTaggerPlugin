@@ -60,15 +60,16 @@ public class NpcAccessibilityTaggerPlugin extends Plugin {
     private OverlayManager overlayManager;
 
     @Override
-    protected void startUp() throws Exception {
-        log.info("Started plugin");
-        updateAddition();
+    protected void startUp() {
+        overlayManager.add(overlay);
+        NpcAccessibilityTaggerParser.getInstance().parse(config);
+        overlay.readConfig();
     }
 
     @Override
-    protected void shutDown() throws Exception {
-        log.info("Shutdown plugin");
-        updateRemoval();
+    protected void shutDown() {
+        overlayManager.remove(overlay);
+        NpcAccessibilityTaggerParser.getInstance().clear();
     }
 
     @Subscribe
@@ -76,22 +77,11 @@ public class NpcAccessibilityTaggerPlugin extends Plugin {
         if (!configChanged.getGroup().equals(NpcAccessibilityTaggerConfig.GROUP)) {
             return;
         }
-        update();
-    }
-
-    private void update() {
-        updateRemoval();
-        updateAddition();
-    }
-
-    private void updateRemoval() {
-        NpcAccessibilityTaggerParser.getInstance().getEntries().clear();
-        overlayManager.remove(overlay);
-    }
-
-    private void updateAddition() {
-        NpcAccessibilityTaggerParser.getInstance().parse(config);
-        overlayManager.add(overlay);
+        if ("endUserConfig".equals(configChanged.getKey())) {
+            NpcAccessibilityTaggerParser.getInstance().clear();
+            NpcAccessibilityTaggerParser.getInstance().parse(config);
+        }
+        overlay.readConfig();
     }
 
     @Provides

@@ -146,6 +146,7 @@ public interface NpcAccessibilityTaggerConfig extends Config {
             description = "Color swatch for custom NPC tagging",
             section = colorSwatchSection
     )
+    @SuppressWarnings("unused")
     default Color colorSwatch() {
         return Color.WHITE;
     }
