@@ -1,10 +1,12 @@
 package com.rymr.npcaccessibilitytagger;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.Text;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 /*
  * Copyright (c) 2023, R-Y-M-R
@@ -34,39 +36,42 @@ import java.util.*;
 public class NpcAccessibilityTaggerParser {
 
     private static final NpcAccessibilityTaggerParser INSTANCE = new NpcAccessibilityTaggerParser();
-    private final Map<Integer, StandardEntry> entries = new HashMap<>(10);
 
-    public Map<Integer, StandardEntry> getEntries() {
-        return entries;
+    @Getter
+    private final Map<Integer, TagEntry> entries = new HashMap<>();
+
+    public void clear() {
+        this.entries.clear();
     }
 
     /**
      * Parses the input config into a list of StandardEntry objects
-     *
-     * @param config
-     * @return List of StandardEntry objects
      */
-    public Map<Integer, StandardEntry> parse(NpcAccessibilityTaggerConfig config) {
+    public void parse(NpcAccessibilityTaggerConfig config) {
         String input = config.endUserConfig();
-        if (input == null || input.isEmpty())
-            return null;
+        if (input == null || input.isBlank())
+            return;
 
         for (String entry : Text.fromCSV(input)) {
             try {
                 String[] parts = entry.split(":");
-//                log.info("Entry: "+entry+"\nParts: " + parts.length);
-                if (parts.length == 2) {
-                    int id = Integer.parseInt(parts[0].trim());
-                    entries.put(id, new StandardEntry(id, parts[1].trim()));
-                } else if (parts.length == 3) {
-                    int id = Integer.parseInt(parts[0].trim());
-                    entries.put(id, new ExtendedEntry(id, parts[1].trim(), Color.decode(appendMissingPound(parts[2].trim()))));
+                if (parts.length < 2) {
+                    log.warn("Skipping incomplete entry: '{}'", entry);
+                    continue;
+                }
+
+                int id = Integer.parseInt(parts[0].trim());
+                String text = parts[1].trim();
+                Color color = parts.length == 3 ? Color.decode(appendMissingPound(parts[2].trim())) : null;
+
+                TagEntry old = entries.putIfAbsent(id, new TagEntry(text, color));
+                if (old != null) {
+                    log.warn("Skipping duplicate tag entry: '{}'", entry);
                 }
             } catch (Exception e) {
-                log.warn("Parse exception: \"" + entry + "\"\n" + e.getMessage());
+                log.warn("Parse exception: \"{}\"", entry, e);
             }
         }
-        return entries;
     }
 
     /**
@@ -77,7 +82,7 @@ public class NpcAccessibilityTaggerParser {
      */
     private String appendMissingPound(String input) {
         if (!input.startsWith("#")) {
-            input = "#" + input;
+            return "#" + input;
         }
         return input;
     }

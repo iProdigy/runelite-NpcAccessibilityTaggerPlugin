@@ -44,6 +44,12 @@ public class NpcAccessibilityTaggerOverlay extends Overlay {
     private final Client client;
     private final NpcAccessibilityTaggerConfig config;
 
+    private boolean appendWordToNPC;
+    private boolean enableCustomTextColor;
+    private Color defaultFontColor;
+    private Font font;
+    private int npcHeightOffset;
+
     @Inject
     NpcAccessibilityTaggerOverlay(Client client, NpcAccessibilityTaggerConfig config) {
         this.client = client;
@@ -52,14 +58,22 @@ public class NpcAccessibilityTaggerOverlay extends Overlay {
         setLayer(OverlayLayer.ABOVE_SCENE);
     }
 
+    public void readConfig() {
+        this.appendWordToNPC = config.appendWordToNPC();
+        this.enableCustomTextColor = config.enableCustomTextColor();
+        this.defaultFontColor = config.defaultFontColor();
+        this.font = config.fontStyle().getFont().deriveFont((float) config.fontSize());
+        this.npcHeightOffset = config.heightAboveNPC();
+    }
+
     @Override
     public Dimension render(Graphics2D graphics) {
-        if (config.appendWordToNPC()) {
+        if (appendWordToNPC) {
             for (NPC npc : client.getTopLevelWorldView().npcs()) {
                 if (npc == null) {
                     continue;
                 }
-                StandardEntry matchingEntry = NpcAccessibilityTaggerParser.getInstance().getEntries().get(npc.getId());
+                TagEntry matchingEntry = NpcAccessibilityTaggerParser.getInstance().getEntries().get(npc.getId());
                 if (matchingEntry == null) {
                     continue;
                 }
@@ -72,15 +86,12 @@ public class NpcAccessibilityTaggerOverlay extends Overlay {
         return null;
     }
 
-    private void renderNpcOverlay(Graphics2D graphics, NPC npc, StandardEntry entry) {
-        final Point textLocation = npc.getCanvasTextLocation(graphics, entry.getText(), npc.getLogicalHeight() + config.heightAboveNPC());
-        graphics.setFont(config.fontStyle().getFont().deriveFont((float) config.fontSize()));
+    private void renderNpcOverlay(Graphics2D graphics, NPC npc, TagEntry entry) {
+        final Point textLocation = npc.getCanvasTextLocation(graphics, entry.getText(), npc.getLogicalHeight() + npcHeightOffset);
         if (textLocation != null) {
-            if (config.enableCustomTextColor() && entry instanceof ExtendedEntry) {
-                OverlayUtil.renderTextLocation(graphics, textLocation, entry.getText(), ((ExtendedEntry) entry).getColor());
-            } else {
-                OverlayUtil.renderTextLocation(graphics, textLocation, entry.getText(), config.defaultFontColor());
-            }
+            graphics.setFont(font);
+            Color color = enableCustomTextColor && entry.getColor() != null ? entry.getColor() : defaultFontColor;
+            OverlayUtil.renderTextLocation(graphics, textLocation, entry.getText(), color);
         }
     }
 
