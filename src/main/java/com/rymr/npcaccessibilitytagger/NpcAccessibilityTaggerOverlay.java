@@ -3,7 +3,6 @@ package com.rymr.npcaccessibilitytagger;
 import com.google.inject.Inject;
 
 import java.awt.*;
-import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -57,11 +56,17 @@ public class NpcAccessibilityTaggerOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         if (config.appendWordToNPC()) {
             for (NPC npc : client.getTopLevelWorldView().npcs()) {
+                if (npc == null) {
+                    continue;
+                }
+                StandardEntry matchingEntry = NpcAccessibilityTaggerParser.getInstance().getEntries().get(npc.getId());
+                if (matchingEntry == null) {
+                    continue;
+                }
                 if (!shouldShow(npc)) {
                     continue;
                 }
-                Optional<StandardEntry> matchingEntry = NpcAccessibilityTaggerParser.getInstance().getEntries().stream().filter(entry -> entry.getId() == npc.getId()).findAny();
-                matchingEntry.ifPresent(standardEntry -> renderNpcOverlay(graphics, npc, standardEntry));
+                renderNpcOverlay(graphics, npc, matchingEntry);
             }
         }
         return null;

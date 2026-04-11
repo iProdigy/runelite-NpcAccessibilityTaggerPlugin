@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.Text;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /*
  * Copyright (c) 2023, R-Y-M-R
@@ -35,9 +34,9 @@ import java.util.List;
 public class NpcAccessibilityTaggerParser {
 
     private static final NpcAccessibilityTaggerParser INSTANCE = new NpcAccessibilityTaggerParser();
-    private final List<StandardEntry> entries = new ArrayList<>(10);
+    private final Map<Integer, StandardEntry> entries = new HashMap<>(10);
 
-    public List<StandardEntry> getEntries() {
+    public Map<Integer, StandardEntry> getEntries() {
         return entries;
     }
 
@@ -47,7 +46,7 @@ public class NpcAccessibilityTaggerParser {
      * @param config
      * @return List of StandardEntry objects
      */
-    public List<StandardEntry> parse(NpcAccessibilityTaggerConfig config) {
+    public Map<Integer, StandardEntry> parse(NpcAccessibilityTaggerConfig config) {
         String input = config.endUserConfig();
         if (input == null || input.isEmpty())
             return null;
@@ -57,9 +56,11 @@ public class NpcAccessibilityTaggerParser {
                 String[] parts = entry.split(":");
 //                log.info("Entry: "+entry+"\nParts: " + parts.length);
                 if (parts.length == 2) {
-                    entries.add(new StandardEntry(Integer.parseInt(parts[0].trim()), parts[1].trim()));
+                    int id = Integer.parseInt(parts[0].trim());
+                    entries.put(id, new StandardEntry(id, parts[1].trim()));
                 } else if (parts.length == 3) {
-                    entries.add(new ExtendedEntry(Integer.parseInt(parts[0].trim()), parts[1].trim(), Color.decode(appendMissingPound(parts[2].trim()))));
+                    int id = Integer.parseInt(parts[0].trim());
+                    entries.put(id, new ExtendedEntry(id, parts[1].trim(), Color.decode(appendMissingPound(parts[2].trim()))));
                 }
             } catch (Exception e) {
                 log.warn("Parse exception: \"" + entry + "\"\n" + e.getMessage());
